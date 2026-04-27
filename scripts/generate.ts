@@ -41,3 +41,24 @@ writeFileSync(
 );
 
 console.log(`Wrote src/functionNames.generated.ts (${methodNames.length} methods)`);
+
+const eventsInterface = ytNamespace.getInterface('Events');
+if (!eventsInterface) {
+  throw new Error('Interface YT.Events not found in @types/youtube');
+}
+
+const eventCallbackNames = eventsInterface
+  .getProperties()
+  .map((p) => p.getName())
+  .filter((n) => n.startsWith('on'))
+  .sort();
+
+writeFileSync(
+  'src/eventCallbackNames.generated.ts',
+  `// AUTO-GENERATED from @types/youtube. Do not edit.\n` +
+    `// Regenerate with \`pnpm generate\`.\n\n` +
+    `export const eventCallbackNames = ${JSON.stringify(eventCallbackNames, null, 2)} as const;\n\n` +
+    `export type EventCallbackName = (typeof eventCallbackNames)[number];\n`,
+);
+
+console.log(`Wrote src/eventCallbackNames.generated.ts (${eventCallbackNames.length} callbacks)`);
