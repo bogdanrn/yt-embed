@@ -1,5 +1,11 @@
 # @bogdanrn/yt-embed
 
+## 0.1.1
+
+### Patch Changes
+
+- 1582e16: ci: verify trusted-publisher flow
+
 ## 0.1.0
 
 ### Minor Changes
