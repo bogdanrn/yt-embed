@@ -1,10 +1,11 @@
+import type * as YT from 'youtube';
 import { PlayerDestroyedError, PlayerInitError } from './errors.js';
 import { eventCallbackNames } from './eventCallbackNames.generated.js';
 import { type FunctionName, functionNames } from './functionNames.generated.js';
 import { ListenerTracker } from './listenerTracker.js';
 import { loadIframeApi } from './loadIframeApi.js';
 import type { PlayerStateCode } from './playerState.js';
-import type { MethodCallOptions, YTEmbedOptions } from './types.js';
+import type { MethodCallOptions, YTEmbedEventMap, YTEmbedOptions } from './types.js';
 
 const DEFAULT_INIT_TIMEOUT = 30_000;
 
@@ -124,23 +125,43 @@ export class YTEmbed extends EventTarget {
     return this.#readyPromise;
   }
 
-  // Task 4.9: override addEventListener to maintain listener counts for extension wiring
+  // Typed overload — autocomplete for YTEmbedEventMap event names.
+  override addEventListener<K extends keyof YTEmbedEventMap>(
+    type: K,
+    listener: (ev: YTEmbedEventMap[K]) => void,
+    options?: AddEventListenerOptions | boolean,
+  ): void;
+  // Fallback — accepts arbitrary string for events not yet listed in the map.
   override addEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject | null,
     options?: AddEventListenerOptions | boolean,
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject | ((ev: Event) => void) | null,
+    options?: AddEventListenerOptions | boolean,
   ): void {
-    super.addEventListener(type, listener, options);
+    super.addEventListener(type, listener as EventListenerOrEventListenerObject | null, options);
     if (listener != null) this.#listenerTracker.add(type);
   }
 
-  // Task 4.9: override removeEventListener to maintain listener counts for extension wiring
+  override removeEventListener<K extends keyof YTEmbedEventMap>(
+    type: K,
+    listener: (ev: YTEmbedEventMap[K]) => void,
+    options?: EventListenerOptions | boolean,
+  ): void;
   override removeEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject | null,
     options?: EventListenerOptions | boolean,
+  ): void;
+  override removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject | ((ev: Event) => void) | null,
+    options?: EventListenerOptions | boolean,
   ): void {
-    super.removeEventListener(type, listener, options);
+    super.removeEventListener(type, listener as EventListenerOrEventListenerObject | null, options);
     if (listener != null) this.#listenerTracker.remove(type);
   }
 
