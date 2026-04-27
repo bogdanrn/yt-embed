@@ -328,6 +328,18 @@ for (const name of functionNames) {
 }
 
 // Declaration merging so player.playVideo() etc. typecheck.
+// Each wrapper inherits the underlying YT.Player method signature, returns a
+// Promise of its result, and accepts an optional trailing MethodCallOptions arg.
+// Overloaded methods (e.g. seekTo, loadVideoById) collapse to the last overload —
+// a known TS limitation when inferring through a generic Promisify.
 type WrappableName = Exclude<FunctionName, SkippedWrapper>;
-// biome-ignore lint/suspicious/noExplicitAny: dynamic mapped methods from generated list.
-export interface YTEmbed extends Record<WrappableName, (...args: any[]) => Promise<unknown>> {}
+
+type Promisify<T> = T extends (...args: infer A) => infer R
+  ? (...args: [...A, MethodCallOptions?]) => Promise<Awaited<R>>
+  : never;
+
+type WrappedPlayer = {
+  [K in WrappableName]: K extends keyof YT.Player ? Promisify<YT.Player[K]> : never;
+};
+
+export interface YTEmbed extends WrappedPlayer {}
