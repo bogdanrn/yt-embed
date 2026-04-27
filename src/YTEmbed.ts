@@ -27,10 +27,13 @@ export class YTEmbed extends EventTarget {
     this.#options = options;
 
     // Create the ready promise eagerly so resolvers are assigned before #initialise runs.
+    // The no-op .catch() prevents unhandled-rejection warnings when the instance is destroyed
+    // without anyone awaiting whenReady(). Callers who do await it still see the rejection.
     this.#readyPromise = new Promise<void>((resolve, reject) => {
       this.#resolveReady = resolve;
       this.#rejectReady = reject;
     });
+    this.#readyPromise.catch(() => {});
 
     // Handle abort signal: if already aborted, short-circuit before initialise.
     if (options.signal) {
