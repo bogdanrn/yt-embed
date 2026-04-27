@@ -93,6 +93,9 @@ export function volumeChangeExtension(options: VolumeChangeExtensionOptions = {}
 // Module augmentation — adds `volumechange` to YTEmbedEventMap so that
 // importing this extension gives full TypeScript autocomplete on addEventListener.
 // ---------------------------------------------------------------------------
+// Relative path augmentation. tsdown will warn about this in the published
+// .d.ts but the augmentation still applies wherever consumers
+// `import { volumeChangeExtension }` (whose .d.ts pulls in this declaration).
 declare module '../types.js' {
   interface YTEmbedEventMap {
     volumechange: CustomEvent<{ volume: number; muted: boolean }>;
