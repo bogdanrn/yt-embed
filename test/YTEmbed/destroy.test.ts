@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { YTEmbed } from '../../src/YTEmbed.js';
 import { PlayerDestroyedError } from '../../src/errors.js';
 import { _resetForTests } from '../../src/loadIframeApi.js';
+import { YTEmbed } from '../../src/YTEmbed.js';
 import { installMockYT } from '../helpers/mockYT.js';
 
 describe('YTEmbed: destroy', () => {

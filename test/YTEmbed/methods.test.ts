@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { YTEmbed } from '../../src/YTEmbed.js';
 import { PlayerDestroyedError } from '../../src/errors.js';
 import { _resetForTests } from '../../src/loadIframeApi.js';
-import { type MockYT, fireYTReady, installMockYT } from '../helpers/mockYT.js';
+import { YTEmbed } from '../../src/YTEmbed.js';
+import { fireYTReady, installMockYT, type MockYT } from '../helpers/mockYT.js';
 
 async function setupPlayer(yt: MockYT): Promise<{
   player: YTEmbed;
@@ -22,7 +22,9 @@ async function setupPlayer(yt: MockYT): Promise<{
     pauseVideo: vi.fn(() => undefined),
     destroy: vi.fn(() => undefined),
   };
-  yt.Player.mockImplementation(() => fakePlayer);
+  yt.Player.mockImplementation(function MockPlayer() {
+    return fakePlayer;
+  });
 
   const player = new YTEmbed('host', { videoId: 'abc' });
   fireYTReady();
@@ -53,7 +55,9 @@ describe('YTEmbed: methods', () => {
   it('queues call before ready, forwards after', async () => {
     document.body.innerHTML = '<div id="host"></div>';
     const fakePlayer = { playVideo: vi.fn(), destroy: vi.fn() };
-    yt.Player.mockImplementation(() => fakePlayer);
+    yt.Player.mockImplementation(function MockPlayer() {
+      return fakePlayer;
+    });
 
     const player = new YTEmbed('host', { videoId: 'abc' });
     const callPromise = player.call('playVideo');
@@ -78,7 +82,9 @@ describe('YTEmbed: methods', () => {
       pauseVideo: vi.fn(() => order.push('pause')),
       destroy: vi.fn(),
     };
-    yt.Player.mockImplementation(() => fakePlayer);
+    yt.Player.mockImplementation(function MockPlayer() {
+      return fakePlayer;
+    });
 
     const player = new YTEmbed('host', { videoId: 'abc' });
     const a = player.call('playVideo');
@@ -128,7 +134,9 @@ describe('YTEmbed: methods', () => {
   it('destroy() rejects pending method promises with PlayerDestroyedError', async () => {
     document.body.innerHTML = '<div id="host"></div>';
     const fakePlayer = { playVideo: vi.fn(), destroy: vi.fn() };
-    yt.Player.mockImplementation(() => fakePlayer);
+    yt.Player.mockImplementation(function MockPlayer() {
+      return fakePlayer;
+    });
 
     const player = new YTEmbed('host', { videoId: 'abc' });
     const pending = player.call('playVideo');
@@ -147,7 +155,9 @@ describe('YTEmbed: methods', () => {
   it('generated wrappers (e.g. player.playVideo()) work like call()', async () => {
     document.body.innerHTML = '<div id="host"></div>';
     const fakePlayer = { playVideo: vi.fn(), destroy: vi.fn() };
-    yt.Player.mockImplementation(() => fakePlayer);
+    yt.Player.mockImplementation(function MockPlayer() {
+      return fakePlayer;
+    });
     const player = new YTEmbed('host', { videoId: 'abc' });
     const promise = (player as unknown as { playVideo: () => Promise<unknown> }).playVideo();
     fireYTReady();

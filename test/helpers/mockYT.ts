@@ -29,11 +29,15 @@ let _pendingYT: MockYT | undefined;
  * that loadIframeApi always goes through the script-injection path in tests.
  */
 export function installMockYT(): { yt: MockYT; cleanup: () => void } {
+  // vitest 4: vi.fn() impl must use `function` or `class` to be callable
+  // as a constructor (`new YT.Player(...)`). Class form is most reliable.
   const yt: MockYT = {
-    Player: vi.fn(() => ({
-      _events: {},
-      destroy: vi.fn(),
-    })),
+    Player: vi.fn(
+      class MockPlayer {
+        _events: Record<string, unknown> = {};
+        destroy = vi.fn();
+      },
+    ),
     PlayerState: {
       UNSTARTED: -1,
       ENDED: 0,
