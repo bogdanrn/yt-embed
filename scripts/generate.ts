@@ -62,3 +62,38 @@ writeFileSync(
 );
 
 console.log(`Wrote src/eventCallbackNames.generated.ts (${eventCallbackNames.length} callbacks)`);
+
+const methodsTable = [
+  '<!-- AUTO-GENERATED from @types/youtube. Do not edit. -->',
+  '<!-- Regenerate with `pnpm generate`. -->',
+  '',
+  '# Methods',
+  '',
+  'All methods return `Promise`. They auto-queue until the player is ready.',
+  '',
+  '| Method | Source |',
+  '| --- | --- |',
+  ...methodNames.map((n) => `| \`${n}\` | YT.Player.${n} |`),
+  '',
+].join('\n');
+writeFileSync('docs/methods.md', methodsTable);
+
+const eventsTable = [
+  '<!-- AUTO-GENERATED from @types/youtube. Do not edit. -->',
+  '<!-- Regenerate with `pnpm generate`. -->',
+  '',
+  '# Events',
+  '',
+  'Subscribe via `player.addEventListener(name, handler)`. Names are derived from `YT.Events` callbacks: strip the `on` prefix and lowercase the rest.',
+  '',
+  '| Event name | YT callback |',
+  '| --- | --- |',
+  ...eventCallbackNames.map((cb) => {
+    const ev = cb.replace(/^on/, '').toLowerCase();
+    return `| \`${ev}\` | \`${cb}\` |`;
+  }),
+  '',
+].join('\n');
+writeFileSync('docs/events.md', eventsTable);
+
+console.log('Wrote docs/methods.md and docs/events.md');
