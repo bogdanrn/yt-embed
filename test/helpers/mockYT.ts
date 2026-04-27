@@ -18,9 +18,15 @@ export interface MockYT {
   };
 }
 
+// Module-level reference so fireYTReady can set window.YT before calling the callback.
+let _pendingYT: MockYT | undefined;
+
 /**
  * Installs a fake `window.YT`. Call within a test; pair with `cleanup()`.
- * Does NOT call `onYouTubeIframeAPIReady` — caller decides when.
+ * Does NOT call `onYouTubeIframeAPIReady` — caller decides when (via fireYTReady).
+ *
+ * window.YT is NOT pre-set here; it is only set when fireYTReady() fires, so
+ * that loadIframeApi always goes through the script-injection path in tests.
  */
 export function installMockYT(): { yt: MockYT; cleanup: () => void } {
   const yt: MockYT = {
@@ -37,11 +43,11 @@ export function installMockYT(): { yt: MockYT; cleanup: () => void } {
       CUED: 5,
     },
   };
-  // biome-ignore lint/suspicious/noExplicitAny: jsdom global injection is an unavoidable any.
-  (window as any).YT = yt;
+  _pendingYT = yt;
   return {
     yt,
     cleanup: () => {
+      _pendingYT = undefined;
       // biome-ignore lint/suspicious/noExplicitAny: jsdom global teardown.
       (window as any).YT = undefined;
       // biome-ignore lint/suspicious/noExplicitAny: jsdom global teardown.
@@ -53,8 +59,12 @@ export function installMockYT(): { yt: MockYT; cleanup: () => void } {
   };
 }
 
-/** Trigger the YT-ready callback if any was registered. */
+/** Trigger the YT-ready callback if any was registered. Sets window.YT first. */
 export function fireYTReady(): void {
+  if (_pendingYT !== undefined) {
+    // biome-ignore lint/suspicious/noExplicitAny: jsdom global injection.
+    (window as any).YT = _pendingYT;
+  }
   // biome-ignore lint/suspicious/noExplicitAny: jsdom global access.
   const cb = (window as any).onYouTubeIframeAPIReady as (() => void) | undefined;
   cb?.();
