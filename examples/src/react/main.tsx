@@ -1,11 +1,11 @@
-import { StrictMode, useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import {
-  YTEmbed,
   PlayerState,
   type PlayerStateCode,
   volumeChangeExtension,
+  YTEmbed,
 } from '@bogdanrn/yt-embed';
+import { StrictMode, useEffect, useRef, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
 function YouTube({ videoId }: { videoId: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,14 +35,19 @@ function YouTube({ videoId }: { videoId: string }) {
   return (
     <div>
       <div ref={ref} />
-      <p>state: {state} (PLAYING={PlayerState.PLAYING})</p>
+      <p>
+        state: {state} (PLAYING={PlayerState.PLAYING})
+      </p>
       <p>volume: {volume}</p>
     </div>
   );
 }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <YouTube videoId="M7lc1UVf-VE" />
-  </StrictMode>,
-);
+const rootEl = document.getElementById('root');
+if (rootEl) {
+  createRoot(rootEl).render(
+    <StrictMode>
+      <YouTube videoId="M7lc1UVf-VE" />
+    </StrictMode>,
+  );
+}
