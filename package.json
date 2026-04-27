@@ -1,0 +1,58 @@
+{
+  "name": "@bogdanrn/yt-embed",
+  "version": "0.0.0-development",
+  "description": "Promise-wrapped YouTube IFrame Player API",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "engines": { "node": ">=20" },
+  "sideEffects": false,
+  "license": "MIT",
+  "author": "Bogdan Radu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bogdanrn/youtube-player.git"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "generate": "tsx scripts/generate.ts",
+    "prebuild": "pnpm generate",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:typecheck": "vitest typecheck --run",
+    "docs": "typedoc",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.27.10",
+    "@types/node": "^22.10.0",
+    "@types/youtube": "^0.1.0",
+    "jsdom": "^25.0.1",
+    "ts-morph": "^24.0.0",
+    "tsdown": "^0.4.0",
+    "tsx": "^4.19.2",
+    "typedoc": "^0.28.0",
+    "typedoc-plugin-markdown": "^4.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
