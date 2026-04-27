@@ -1,15 +1,22 @@
 #!/usr/bin/env tsx
 import { writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { Project } from 'ts-morph';
 
 const project = new Project({ tsConfigFilePath: 'tsconfig.json' });
 
-// @types/youtube declares a global `declare namespace YT { ... }`.
-// ts-morph only pre-loads files matched by tsconfig "include"; we must add
-// the ambient declaration file explicitly so getModules() finds it.
-project.addSourceFileAtPath(
-  'node_modules/@types/youtube/index.d.ts',
+// @types/youtube declares a global `declare namespace YT { ... }`. ts-morph
+// only pre-loads files matched by tsconfig "include"; ambient global d.ts
+// files don't get pulled in automatically. Resolve the package via Node's
+// resolver so this works under pnpm, npm, yarn, and bun without hardcoding
+// node_modules/ paths.
+const require = createRequire(import.meta.url);
+const ytTypesIndex = join(
+  dirname(require.resolve('@types/youtube/package.json')),
+  'index.d.ts',
 );
+project.addSourceFileAtPath(ytTypesIndex);
 
 const ytNamespace = project.getSourceFiles()
   .flatMap((f) => f.getModules())
