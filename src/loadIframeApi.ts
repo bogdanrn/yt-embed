@@ -1,3 +1,4 @@
+import type * as YT from 'youtube';
 import { IframeApiLoadError } from './errors.js';
 
 const SCRIPT_URL = 'https://www.youtube.com/iframe_api';

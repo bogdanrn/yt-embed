@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { YTEmbed } from '../../src/YTEmbed.js';
 import { _resetForTests } from '../../src/loadIframeApi.js';
-import { type MockYT, fireYTReady, installMockYT } from '../helpers/mockYT.js';
+import { YTEmbed } from '../../src/YTEmbed.js';
+import { fireYTReady, installMockYT, type MockYT } from '../helpers/mockYT.js';
 
 function setup(): { yt: MockYT; cleanup: () => void } {
   const { yt, cleanup } = installMockYT();

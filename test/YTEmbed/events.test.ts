@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { YTEmbed } from '../../src/YTEmbed.js';
 import { _resetForTests } from '../../src/loadIframeApi.js';
-import { type MockYT, fireYTReady, installMockYT } from '../helpers/mockYT.js';
+import { YTEmbed } from '../../src/YTEmbed.js';
+import { fireYTReady, installMockYT, type MockYT } from '../helpers/mockYT.js';
 
 describe('YTEmbed: events', () => {
   let yt: MockYT;
@@ -66,7 +66,7 @@ describe('YTEmbed: events', () => {
   });
 
   it('subscribes to all event names from eventCallbackNames at runtime', async () => {
-    const player = new YTEmbed('host', { videoId: 'abc' });
+    new YTEmbed('host', { videoId: 'abc' });
     fireYTReady();
     await Promise.resolve(); // flush microtasks so #initialise() constructs YT.Player
     const events = getEvents();
