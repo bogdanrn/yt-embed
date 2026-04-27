@@ -1,0 +1,42 @@
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { installMockYT, fireYTReady } from './helpers/mockYT.js';
+import { loadIframeApi, _resetForTests } from '../src/loadIframeApi.js';
+
+describe('loadIframeApi: single script injection', () => {
+  let cleanup: () => void;
+
+  beforeEach(() => {
+    ({ cleanup } = installMockYT());
+    _resetForTests();
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('injects exactly one <script> across N concurrent calls', async () => {
+    const p1 = loadIframeApi();
+    const p2 = loadIframeApi();
+    const p3 = loadIframeApi();
+    fireYTReady();
+    await Promise.all([p1, p2, p3]);
+    const scripts = document.querySelectorAll('script[src="https://www.youtube.com/iframe_api"]');
+    expect(scripts).toHaveLength(1);
+  });
+
+  it('resolves with window.YT', async () => {
+    const promise = loadIframeApi();
+    fireYTReady();
+    const yt = await promise;
+    expect(yt).toBeDefined();
+    expect(yt.Player).toBeDefined();
+  });
+
+  it('caches across calls (same promise)', async () => {
+    const p1 = loadIframeApi();
+    const p2 = loadIframeApi();
+    expect(p1).toBe(p2);
+    fireYTReady();
+    await p1;
+  });
+});
