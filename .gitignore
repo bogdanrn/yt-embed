@@ -26,3 +26,4 @@ inspiration/
 
 # Claude Code local settings (per-developer)
 .claude/settings.local.json
+todo.md
