@@ -24,7 +24,7 @@
   "author": "Bogdan Radu",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bogdanrn/youtube-player.git"
+    "url": "git+https://github.com/bogdanrn/yt-embed.git"
   },
   "publishConfig": {
     "access": "public",
