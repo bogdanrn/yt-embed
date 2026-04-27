@@ -1,5 +1,7 @@
 # @bogdanrn/yt-embed
 
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/bogdanrn/yt-embed?utm_source=oss&utm_medium=github&utm_campaign=bogdanrn%2Fyt-embed&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
+
 Promise-wrapped YouTube IFrame Player API. TypeScript-first, dependency-free, `EventTarget`-based.
 
 ## Install
