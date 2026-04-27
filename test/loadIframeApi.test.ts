@@ -61,3 +61,38 @@ describe('loadIframeApi: chaining', () => {
     expect(order).toEqual(['previous', 'after-resolve']);
   });
 });
+
+describe('loadIframeApi: script error', () => {
+  let cleanup: () => void;
+
+  beforeEach(() => {
+    ({ cleanup } = installMockYT());
+    _resetForTests();
+  });
+  afterEach(() => cleanup());
+
+  it('rejects with IframeApiLoadError on script error event', async () => {
+    const promise = loadIframeApi();
+    const script = document.querySelector(
+      'script[src="https://www.youtube.com/iframe_api"]',
+    ) as HTMLScriptElement;
+    script.dispatchEvent(new Event('error'));
+    await expect(promise).rejects.toMatchObject({
+      name: 'IframeApiLoadError',
+      message: /Failed to load/,
+    });
+  });
+
+  it('allows retry after a failed load', async () => {
+    const first = loadIframeApi().catch(() => 'rejected');
+    const script1 = document.querySelector(
+      'script[src="https://www.youtube.com/iframe_api"]',
+    ) as HTMLScriptElement;
+    script1.dispatchEvent(new Event('error'));
+    expect(await first).toBe('rejected');
+
+    const second = loadIframeApi();
+    fireYTReady();
+    await expect(second).resolves.toBeDefined();
+  });
+});
