@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+*.tsbuildinfo
+
+# Docs build output
+docs/api/
+
+# Reference material — never publish to GitHub
+inspiration/
+
+# OS / editor
+.DS_Store
+*.log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# Claude Code local settings (per-developer)
+.claude/settings.local.json
