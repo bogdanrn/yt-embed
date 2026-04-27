@@ -47,4 +47,13 @@ describe('YTEmbed: destroy', () => {
     const player = new YTEmbed('host', { videoId: 'abc', signal: ac.signal });
     expect(player.destroyed).toBe(true);
   });
+
+  it('StrictMode-style double mount + double destroy leaves no leaked iframes', () => {
+    document.body.innerHTML = '<div id="host"></div>';
+    const a = new YTEmbed('host', { videoId: 'abc' });
+    const b = new YTEmbed('host', { videoId: 'abc' });
+    a.destroy();
+    b.destroy();
+    expect(document.querySelectorAll('iframe')).toHaveLength(0);
+  });
 });
