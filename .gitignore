@@ -8,6 +8,7 @@ coverage/
 
 # Docs build output
 docs/api/
+docs/superpowers/
 
 # Reference material — never publish to GitHub
 inspiration/
