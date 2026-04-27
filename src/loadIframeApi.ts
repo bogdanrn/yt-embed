@@ -5,7 +5,7 @@ const SCRIPT_URL = 'https://www.youtube.com/iframe_api';
 let cachedPromise: Promise<typeof YT> | null = null;
 
 export interface YTEmbedConfig {
-  scriptUrl?: string;
+  scriptUrl?: string | undefined;
 }
 export const config: YTEmbedConfig = {};
 
