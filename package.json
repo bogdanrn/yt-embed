@@ -33,6 +33,7 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "generate": "tsx scripts/generate.ts",
+    "postgenerate": "tsx scripts/inject-readme.ts",
     "prebuild": "pnpm generate",
     "build": "tsdown",
     "dev": "tsdown --watch",
