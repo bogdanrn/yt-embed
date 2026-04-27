@@ -40,3 +40,24 @@ describe('loadIframeApi: single script injection', () => {
     await p1;
   });
 });
+
+describe('loadIframeApi: chaining', () => {
+  let cleanup: () => void;
+
+  beforeEach(() => {
+    ({ cleanup } = installMockYT());
+    _resetForTests();
+  });
+  afterEach(() => cleanup());
+
+  it('calls the pre-existing onYouTubeIframeAPIReady before resolving', async () => {
+    const order: string[] = [];
+    // biome-ignore lint/suspicious/noExplicitAny: jsdom global.
+    (window as any).onYouTubeIframeAPIReady = () => order.push('previous');
+    const promise = loadIframeApi();
+    fireYTReady();
+    await promise;
+    order.push('after-resolve');
+    expect(order).toEqual(['previous', 'after-resolve']);
+  });
+});
