@@ -10,24 +10,25 @@ export interface YTEmbedConfig {
 }
 export const config: YTEmbedConfig = {};
 
+type YTWindow = Window & {
+  YT?: typeof YT;
+  onYouTubeIframeAPIReady?: () => void;
+};
+
 export function loadIframeApi(): Promise<typeof YT> {
   if (cachedPromise) return cachedPromise;
 
   cachedPromise = new Promise<typeof YT>((resolve, reject) => {
-    // biome-ignore lint/suspicious/noExplicitAny: window.YT augmentation is global.
-    const existingYT = (window as any).YT;
-    if (existingYT?.Player) {
-      resolve(existingYT);
+    const w = window as YTWindow;
+    if (w.YT?.Player) {
+      resolve(w.YT);
       return;
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: window callback augmentation.
-    const previous = (window as any).onYouTubeIframeAPIReady as (() => void) | undefined;
-    // biome-ignore lint/suspicious/noExplicitAny: window callback augmentation.
-    (window as any).onYouTubeIframeAPIReady = () => {
+    const previous = w.onYouTubeIframeAPIReady;
+    w.onYouTubeIframeAPIReady = () => {
       previous?.();
-      // biome-ignore lint/suspicious/noExplicitAny: window.YT global.
-      resolve((window as any).YT as typeof YT);
+      resolve(w.YT as typeof YT);
     };
 
     const url = config.scriptUrl ?? SCRIPT_URL;
@@ -36,6 +37,9 @@ export function loadIframeApi(): Promise<typeof YT> {
     script.async = true;
     script.addEventListener('error', (event) => {
       cachedPromise = null; // allow retry after failure
+      if (previous) w.onYouTubeIframeAPIReady = previous;
+      else delete w.onYouTubeIframeAPIReady;
+      script.remove();
       reject(new IframeApiLoadError('Failed to load YouTube IFrame API', { cause: event }));
     });
     document.head.appendChild(script);

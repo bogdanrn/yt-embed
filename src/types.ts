@@ -1,6 +1,7 @@
+import type { Extension } from './extensions/types.js';
 import type { PlayerStateCode } from './playerState.js';
 
-export type { PlayerStateCode };
+export type { Extension };
 export type PlayerVars = YT.PlayerVars;
 
 export interface MethodCallOptions {
@@ -8,15 +9,6 @@ export interface MethodCallOptions {
   awaitState?: boolean;
   /** Cancels the wrapper's promise. See spec §3.3. */
   signal?: AbortSignal;
-}
-
-// Extension interface is forward-declared here so YTEmbedOptions can
-// reference it. The canonical declaration lives in `extensions/types.ts`
-// (Phase 4) and is structurally identical, so cross-file usage stays
-// compatible without explicit re-export.
-export interface Extension {
-  readonly events: readonly string[];
-  attach(player: unknown): () => void;
 }
 
 export interface YTEmbedOptions {
@@ -37,9 +29,8 @@ export interface YTEmbedEventMap {
   playbackratechange: CustomEvent<{ rate: number }>;
   error: CustomEvent<{ code: number; message: string }>;
   apichange: CustomEvent<void>;
-  // Synthesised by the built-in volumeChangeExtension. Fires only when the
-  // extension is registered; declared here so types are stable in the
-  // published .d.ts bundle (relative-path module augmentation is unreliable
-  // after tsdown rolls all source into one .d.ts file).
+  // Synthesised by volumeChangeExtension. Declared on the canonical map because
+  // tsdown bundles all .d.ts into one file, making relative-path module
+  // augmentation unreliable.
   volumechange: CustomEvent<{ volume: number; muted: boolean }>;
 }
