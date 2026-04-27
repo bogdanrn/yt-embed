@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  IframeApiLoadError,
-  PlayerDestroyedError,
-  PlayerInitError,
-} from '../src/errors.js';
+import { IframeApiLoadError, PlayerDestroyedError, PlayerInitError } from '../src/errors.js';
 
 describe('errors', () => {
   it.each([

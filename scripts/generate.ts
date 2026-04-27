@@ -12,13 +12,11 @@ const project = new Project({ tsConfigFilePath: 'tsconfig.json' });
 // resolver so this works under pnpm, npm, yarn, and bun without hardcoding
 // node_modules/ paths.
 const require = createRequire(import.meta.url);
-const ytTypesIndex = join(
-  dirname(require.resolve('@types/youtube/package.json')),
-  'index.d.ts',
-);
+const ytTypesIndex = join(dirname(require.resolve('@types/youtube/package.json')), 'index.d.ts');
 project.addSourceFileAtPath(ytTypesIndex);
 
-const ytNamespace = project.getSourceFiles()
+const ytNamespace = project
+  .getSourceFiles()
   .flatMap((f) => f.getModules())
   .find((m) => m.getName() === 'YT');
 
@@ -35,16 +33,11 @@ if (!playerClass) {
 }
 
 // Deduplicate overloaded method names with Set, then sort.
-const methodNames = [
-  ...new Set(playerClass.getMethods().map((m) => m.getName())),
-].sort();
+const methodNames = [...new Set(playerClass.getMethods().map((m) => m.getName()))].sort();
 
 writeFileSync(
   'src/functionNames.generated.ts',
-  `// AUTO-GENERATED from @types/youtube. Do not edit.\n` +
-    `// Regenerate with \`pnpm generate\`.\n\n` +
-    `export const functionNames = ${JSON.stringify(methodNames, null, 2)} as const;\n\n` +
-    `export type FunctionName = (typeof functionNames)[number];\n`,
+  `// AUTO-GENERATED from @types/youtube. Do not edit.\n// Regenerate with \`pnpm generate\`.\n\nexport const functionNames = ${JSON.stringify(methodNames, null, 2)} as const;\n\nexport type FunctionName = (typeof functionNames)[number];\n`,
 );
 
 console.log(`Wrote src/functionNames.generated.ts (${methodNames.length} methods)`);
@@ -62,10 +55,7 @@ const eventCallbackNames = eventsInterface
 
 writeFileSync(
   'src/eventCallbackNames.generated.ts',
-  `// AUTO-GENERATED from @types/youtube. Do not edit.\n` +
-    `// Regenerate with \`pnpm generate\`.\n\n` +
-    `export const eventCallbackNames = ${JSON.stringify(eventCallbackNames, null, 2)} as const;\n\n` +
-    `export type EventCallbackName = (typeof eventCallbackNames)[number];\n`,
+  `// AUTO-GENERATED from @types/youtube. Do not edit.\n// Regenerate with \`pnpm generate\`.\n\nexport const eventCallbackNames = ${JSON.stringify(eventCallbackNames, null, 2)} as const;\n\nexport type EventCallbackName = (typeof eventCallbackNames)[number];\n`,
 );
 
 console.log(`Wrote src/eventCallbackNames.generated.ts (${eventCallbackNames.length} callbacks)`);
