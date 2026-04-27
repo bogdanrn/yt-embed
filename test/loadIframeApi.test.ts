@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { installMockYT, fireYTReady } from './helpers/mockYT.js';
-import { loadIframeApi, _resetForTests } from '../src/loadIframeApi.js';
+import { _resetForTests, loadIframeApi } from '../src/loadIframeApi.js';
+import { fireYTReady, installMockYT } from './helpers/mockYT.js';
 
 describe('loadIframeApi: single script injection', () => {
   let cleanup: () => void;
