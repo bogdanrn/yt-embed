@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { installMockYT } from '../helpers/mockYT.js';
-import { _resetForTests } from '../../src/loadIframeApi.js';
 import { YTEmbed } from '../../src/YTEmbed.js';
+import { _resetForTests } from '../../src/loadIframeApi.js';
+import { installMockYT } from '../helpers/mockYT.js';
 
 describe('YTEmbed: constructor', () => {
   let cleanup: () => void;
