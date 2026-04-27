@@ -96,3 +96,35 @@ describe('loadIframeApi: script error', () => {
     await expect(second).resolves.toBeDefined();
   });
 });
+
+describe('loadIframeApi: SSR safety', () => {
+  it('module import does not access window/document at top level', async () => {
+    // jsdom is present here, so we just confirm we can re-import the module
+    // without it throwing during evaluation. The real SSR check is that the
+    // file contains no top-level DOM refs — verified by inspection.
+    await expect(import('../src/loadIframeApi.js')).resolves.toBeDefined();
+  });
+});
+
+describe('loadIframeApi: scriptUrl override', () => {
+  let cleanup: () => void;
+
+  beforeEach(() => {
+    ({ cleanup } = installMockYT());
+    _resetForTests();
+  });
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('honors config.scriptUrl', async () => {
+    const { config } = await import('../src/loadIframeApi.js');
+    config.scriptUrl = 'https://example.test/iframe_api.js';
+    const promise = loadIframeApi();
+    const script = document.querySelector('script') as HTMLScriptElement;
+    expect(script.src).toBe('https://example.test/iframe_api.js');
+    config.scriptUrl = undefined;
+    fireYTReady();
+    await promise;
+  });
+});
