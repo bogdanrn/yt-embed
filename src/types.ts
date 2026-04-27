@@ -30,8 +30,6 @@ export interface YTEmbedOptions {
   initTimeoutMs?: number;
 }
 
-// `player` ref is `unknown` in Phase 2; tightened to YTEmbed via declaration
-// merging when ./YTEmbed.ts lands in Phase 4.
 export interface YTEmbedEventMap {
   ready: CustomEvent<{ player: unknown }>;
   statechange: CustomEvent<{ state: PlayerStateCode }>;
@@ -39,4 +37,9 @@ export interface YTEmbedEventMap {
   playbackratechange: CustomEvent<{ rate: number }>;
   error: CustomEvent<{ code: number; message: string }>;
   apichange: CustomEvent<void>;
+  // Synthesised by the built-in volumeChangeExtension. Fires only when the
+  // extension is registered; declared here so types are stable in the
+  // published .d.ts bundle (relative-path module augmentation is unreliable
+  // after tsdown rolls all source into one .d.ts file).
+  volumechange: CustomEvent<{ volume: number; muted: boolean }>;
 }
