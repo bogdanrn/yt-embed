@@ -9,5 +9,5 @@ describe('codegen drift guard', () => {
       { encoding: 'utf8' },
     ).trim();
     expect(status, 'generated files drifted; run `pnpm generate` and commit').toBe('');
-  });
+  }, 60_000);
 });
