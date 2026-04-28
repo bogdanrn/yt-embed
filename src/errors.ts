@@ -9,3 +9,7 @@ export class PlayerInitError extends Error {
 export class PlayerDestroyedError extends Error {
   override name = 'PlayerDestroyedError';
 }
+
+export class EnvironmentError extends Error {
+  override name = 'EnvironmentError';
+}

@@ -11,6 +11,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/index.js",
+      "require": "./dist/vue/index.cjs"
+    },
+    "./svelte": {
+      "types": "./dist/svelte/index.d.ts",
+      "import": "./dist/svelte/index.js",
+      "require": "./dist/svelte/index.cjs"
     }
   },
   "files": [
@@ -55,10 +70,22 @@
     "*.{js,jsx,ts,tsx,json,jsonc,md}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
   },
   "peerDependencies": {
-    "@types/youtube": "^0.2.0"
+    "@types/youtube": "^0.2.0",
+    "react": ">=18",
+    "svelte": ">=4",
+    "vue": ">=3"
   },
   "peerDependenciesMeta": {
     "@types/youtube": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "vue": {
       "optional": true
     }
   },
@@ -68,17 +95,24 @@
     "@commitlint/cli": "^20.5.2",
     "@commitlint/config-conventional": "^20.5.0",
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@types/youtube": "^0.2.0",
     "@vitest/coverage-v8": "^4.1.5",
     "jsdom": "^29.1.0",
     "lint-staged": "^16.4.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "simple-git-hooks": "^2.13.1",
+    "svelte": "^5.55.5",
     "ts-morph": "^28.0.0",
     "tsdown": "^0.21.10",
     "tsx": "^4.21.0",
     "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "vue": "^3.5.33"
   }
 }

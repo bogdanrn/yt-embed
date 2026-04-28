@@ -3,7 +3,7 @@ import type { Extension } from './types.js';
 
 export interface VolumeChangeExtensionOptions {
   /** Polling interval in ms. Default: 250. */
-  interval?: number;
+  intervalMs?: number;
 }
 
 type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -31,7 +31,7 @@ interface VolumeMethodMap {
  *    `volumechange` listener. Removed in `detach`, which fires on last-listener-leave or destroy.
  */
 export function volumeChangeExtension(options: VolumeChangeExtensionOptions = {}): Extension {
-  const intervalMs = options.interval ?? 250;
+  const intervalMs = options.intervalMs ?? 250;
 
   return {
     events: ['volumechange'],
