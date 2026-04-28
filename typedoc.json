@@ -1,8 +1,16 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/index.ts"],
+  "plugin": ["typedoc-plugin-markdown"],
   "out": "docs/api",
   "readme": "none",
-  "githubPages": true,
-  "tsconfig": "tsconfig.json"
+  "tsconfig": "tsconfig.json",
+  "hideBreadcrumbs": true,
+  "hidePageHeader": true,
+  "useCodeBlocks": true,
+  "expandObjects": true,
+  "parametersFormat": "table",
+  "indexFormat": "table",
+  "outputFileStrategy": "modules",
+  "fileExtension": ".md"
 }

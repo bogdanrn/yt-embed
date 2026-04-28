@@ -9,6 +9,8 @@ coverage/
 # Docs build output
 docs/api/
 docs/superpowers/
+docs-site/.vitepress/cache/
+docs-site/.vitepress/dist/
 
 # Reference material — never publish to GitHub
 inspiration/

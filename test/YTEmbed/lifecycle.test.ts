@@ -49,4 +49,16 @@ describe('YTEmbed: whenReady', () => {
     captureCtorArgs(yt).events.onReady?.({});
     await Promise.all([a, b]);
   });
+
+  it('ready getter mirrors readiness without awaiting', async () => {
+    const player = new YTEmbed('host', { videoId: 'abc' });
+    expect(player.ready).toBe(false);
+    fireYTReady();
+    await Promise.resolve();
+    expect(player.ready).toBe(false); // onReady not yet fired
+    captureCtorArgs(yt).events.onReady?.({});
+    expect(player.ready).toBe(true);
+    await player.whenReady();
+    expect(player.ready).toBe(true);
+  });
 });

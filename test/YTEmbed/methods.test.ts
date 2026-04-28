@@ -100,7 +100,7 @@ describe('YTEmbed: methods', () => {
     expect(order).toEqual(['play', 'seek', 'pause']);
   });
 
-  it('awaitState: true resolves on next statechange', async () => {
+  it('awaitState: true resolves when reaching the terminal state for the method', async () => {
     const ctx = await setupPlayer(yt);
     ctx.fireOnReady();
     const promise = ctx.player.call('playVideo', { awaitState: true });
@@ -110,7 +110,47 @@ describe('YTEmbed: methods', () => {
     });
     await Promise.resolve();
     expect(resolved).toBe(false);
+    // BUFFERING is NOT the terminal state for playVideo — must keep waiting.
+    ctx.fireStateChange(3);
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    // PLAYING is the terminal state — now resolve.
     ctx.fireStateChange(1);
+    await promise;
+    expect(resolved).toBe(true);
+  });
+
+  it('awaitState: true resolves on next statechange for methods without a target state', async () => {
+    const ctx = await setupPlayer(yt);
+    // Add `mute` to the fake player so the call does not throw.
+    (ctx.fakePlayer as unknown as { mute: () => undefined }).mute = vi.fn(() => undefined);
+    ctx.fireOnReady();
+    const promise = ctx.player.call('mute', { awaitState: true });
+    let resolved = false;
+    promise.then(() => {
+      resolved = true;
+    });
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    // Any statechange resolves an unmapped method.
+    ctx.fireStateChange(3);
+    await promise;
+    expect(resolved).toBe(true);
+  });
+
+  it('awaitState pauseVideo waits for PAUSED, not PLAYING', async () => {
+    const ctx = await setupPlayer(yt);
+    ctx.fireOnReady();
+    const promise = ctx.player.call('pauseVideo', { awaitState: true });
+    let resolved = false;
+    promise.then(() => {
+      resolved = true;
+    });
+    await Promise.resolve();
+    ctx.fireStateChange(1); // PLAYING — wrong target
+    await Promise.resolve();
+    expect(resolved).toBe(false);
+    ctx.fireStateChange(2); // PAUSED — terminal for pauseVideo
     await promise;
     expect(resolved).toBe(true);
   });

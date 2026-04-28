@@ -1,9 +1,10 @@
 import type { YTEmbed } from '../YTEmbed.js';
+import { wrapInstanceMethod } from './_wrapInstanceMethod.js';
 import type { Extension } from './types.js';
 
 export interface VolumeChangeExtensionOptions {
   /** Polling interval in ms. Default: 250. */
-  interval?: number;
+  intervalMs?: number;
 }
 
 type AsyncFn = (...args: unknown[]) => Promise<unknown>;
@@ -31,7 +32,7 @@ interface VolumeMethodMap {
  *    `volumechange` listener. Removed in `detach`, which fires on last-listener-leave or destroy.
  */
 export function volumeChangeExtension(options: VolumeChangeExtensionOptions = {}): Extension {
-  const intervalMs = options.interval ?? 250;
+  const intervalMs = options.intervalMs ?? 250;
 
   return {
     events: ['volumechange'],
@@ -64,29 +65,24 @@ export function volumeChangeExtension(options: VolumeChangeExtensionOptions = {}
       const timer = setInterval(() => void readAndMaybeEmit(), intervalMs);
 
       // Hook path: wrap volume-affecting methods to emit immediately on our own calls.
-      const origSetVolume = vm.setVolume.bind(player);
-      const origMute = vm.mute.bind(player);
-      const origUnMute = vm.unMute.bind(player);
-
-      const hookForMethod =
-        (orig: AsyncFn): AsyncFn =>
+      const wrap =
+        (previous: AsyncFn): AsyncFn =>
         async (...args: unknown[]): Promise<unknown> => {
-          const result = await orig(...args);
+          const result = await previous(...args);
           await readAndMaybeEmit();
           return result;
         };
 
-      vm.setVolume = hookForMethod(origSetVolume);
-      vm.mute = hookForMethod(origMute);
-      vm.unMute = hookForMethod(origUnMute);
+      const restoreSetVolume = wrapInstanceMethod<AsyncFn>(player, 'setVolume', wrap);
+      const restoreMute = wrapInstanceMethod<AsyncFn>(player, 'mute', wrap);
+      const restoreUnMute = wrapInstanceMethod<AsyncFn>(player, 'unMute', wrap);
 
       return () => {
         detached = true;
         clearInterval(timer);
-        // Delete the instance-level shadow so the prototype wrapper takes over again.
-        delete (vm as Partial<VolumeMethodMap>).setVolume;
-        delete (vm as Partial<VolumeMethodMap>).mute;
-        delete (vm as Partial<VolumeMethodMap>).unMute;
+        restoreSetVolume();
+        restoreMute();
+        restoreUnMute();
       };
     },
   };

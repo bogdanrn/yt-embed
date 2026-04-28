@@ -44,7 +44,7 @@ describe('volumeChangeExtension: hook path', () => {
 
     const player = new YTEmbed('host', {
       videoId: 'abc',
-      extensions: [volumeChangeExtension({ interval: 5_000 })],
+      extensions: [volumeChangeExtension({ intervalMs: 5_000 })],
     });
     const handler = vi.fn();
     player.addEventListener('volumechange', handler);
@@ -104,7 +104,7 @@ describe('volumeChangeExtension: polling lifecycle', () => {
     const ctx = makePlayer();
     new YTEmbed('host', {
       videoId: 'abc',
-      extensions: [volumeChangeExtension({ interval: 100 })],
+      extensions: [volumeChangeExtension({ intervalMs: 100 })],
     });
     fireYTReady();
     await Promise.resolve(); // flush microtasks so #initialise() constructs YT.Player
@@ -119,7 +119,7 @@ describe('volumeChangeExtension: polling lifecycle', () => {
     const ctx = makePlayer();
     const player = new YTEmbed('host', {
       videoId: 'abc',
-      extensions: [volumeChangeExtension({ interval: 100 })],
+      extensions: [volumeChangeExtension({ intervalMs: 100 })],
     });
     const handler = vi.fn();
     player.addEventListener('volumechange', handler);
@@ -139,7 +139,7 @@ describe('volumeChangeExtension: polling lifecycle', () => {
     const ctx = makePlayer();
     const player = new YTEmbed('host', {
       videoId: 'abc',
-      extensions: [volumeChangeExtension({ interval: 100 })],
+      extensions: [volumeChangeExtension({ intervalMs: 100 })],
     });
     const handler = vi.fn();
     player.addEventListener('volumechange', handler);
@@ -158,7 +158,7 @@ describe('volumeChangeExtension: polling lifecycle', () => {
     const ctx = makePlayer();
     const player = new YTEmbed('host', {
       videoId: 'abc',
-      extensions: [volumeChangeExtension({ interval: 100 })],
+      extensions: [volumeChangeExtension({ intervalMs: 100 })],
     });
     const handler = vi.fn();
     player.addEventListener('volumechange', handler);
