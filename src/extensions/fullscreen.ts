@@ -50,20 +50,15 @@ export function fullscreenExtension(options: FullscreenExtensionOptions = {}): E
         else await enter();
       };
 
-      const augment = player as unknown as {
-        enterFullscreen?: () => Promise<void>;
-        exitFullscreen?: () => Promise<void>;
-        toggleFullscreen?: () => Promise<void>;
-      };
-      augment.enterFullscreen = enter;
-      augment.exitFullscreen = exit;
-      augment.toggleFullscreen = toggle;
+      player.enterFullscreen = enter;
+      player.exitFullscreen = exit;
+      player.toggleFullscreen = toggle;
 
       return () => {
         document.removeEventListener('fullscreenchange', onChange);
-        delete augment.enterFullscreen;
-        delete augment.exitFullscreen;
-        delete augment.toggleFullscreen;
+        delete player.enterFullscreen;
+        delete player.exitFullscreen;
+        delete player.toggleFullscreen;
       };
     },
   };

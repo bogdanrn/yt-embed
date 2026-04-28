@@ -1,4 +1,5 @@
 import type { YTEmbed } from '../YTEmbed.js';
+import { wrapInstanceMethod } from './_wrapInstanceMethod.js';
 import type { Extension } from './types.js';
 
 export interface SeekRangeExtensionOptions {
@@ -8,9 +9,7 @@ export interface SeekRangeExtensionOptions {
   max?: number;
 }
 
-interface SeekCapable {
-  seekTo: (time: number, allowSeekAhead: boolean, ...rest: unknown[]) => Promise<unknown>;
-}
+type SeekFn = (time: number, allowSeekAhead: boolean, ...rest: unknown[]) => Promise<unknown>;
 
 /**
  * Wraps `seekTo` to clamp the requested time to `[min, max]`. Useful for clip
@@ -25,28 +24,17 @@ export function seekRangeExtension(options: SeekRangeExtensionOptions = {}): Ext
     events: ['seekclamped'],
     eager: true,
     attach(player: YTEmbed): () => void {
-      const cap = player as unknown as SeekCapable;
-      const origSeekTo = cap.seekTo.bind(player);
-
-      const wrappedSeek = async (
-        time: number,
-        allowSeekAhead: boolean,
-        ...rest: unknown[]
-      ): Promise<unknown> => {
-        const clamped = Math.min(Math.max(time, min), max);
-        if (clamped !== time) {
-          player.dispatchEvent(
-            new CustomEvent('seekclamped', { detail: { requested: time, clamped } }),
-          );
-        }
-        return origSeekTo(clamped, allowSeekAhead, ...rest);
-      };
-
-      (cap as unknown as { seekTo: typeof wrappedSeek }).seekTo = wrappedSeek;
-
-      return () => {
-        delete (cap as Partial<SeekCapable>).seekTo;
-      };
+      return wrapInstanceMethod<SeekFn>(player, 'seekTo', (previous) => {
+        return async (time: number, allowSeekAhead: boolean, ...rest: unknown[]) => {
+          const clamped = Math.min(Math.max(time, min), max);
+          if (clamped !== time) {
+            player.dispatchEvent(
+              new CustomEvent('seekclamped', { detail: { requested: time, clamped } }),
+            );
+          }
+          return previous(clamped, allowSeekAhead, ...rest);
+        };
+      });
     },
   };
 }

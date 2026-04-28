@@ -91,6 +91,10 @@ export class YTEmbed extends EventTarget {
 
   readonly #tickSubscribers = new Set<TickSubscriber>();
   #tickTimer: ReturnType<typeof setInterval> | null = null;
+  // Cleared at the start of each tick; coalesces in-flight wrapper reads
+  // (getCurrentTime, getDuration, getVideoLoadedFraction, …) so multiple
+  // polling extensions sharing the same tick only trigger one IPC per method.
+  readonly #tickReadCache = new Map<string, Promise<unknown>>();
 
   constructor(target: HTMLElement | string, options: YTEmbedOptions) {
     super();
@@ -174,6 +178,10 @@ export class YTEmbed extends EventTarget {
     if (this.#destroyed) return;
     const base = this.#options.pollingIntervalMs ?? DEFAULT_POLLING_INTERVAL;
     this.#tickTimer = setInterval(() => {
+      // Reset the per-tick read cache so the first `tickRead(method)` of this
+      // tick triggers a fresh wrapper call; subsequent calls share the same
+      // promise.
+      this.#tickReadCache.clear();
       // Snapshot the iteration so a subscriber unsubscribing inside its own fn
       // doesn't perturb the loop.
       for (const sub of [...this.#tickSubscribers]) {
@@ -188,6 +196,20 @@ export class YTEmbed extends EventTarget {
         }
       }
     }, base);
+  }
+
+  /**
+   * Read a wrapper method through a per-tick cache. Multiple subscribers can
+   * call `tickRead('getCurrentTime')` in the same tick and share one in-flight
+   * promise. Useful for polling extensions that all need `getCurrentTime`,
+   * `getDuration`, etc. — one IPC per method per tick instead of N.
+   */
+  tickRead<T = unknown>(method: string): Promise<T> {
+    const cached = this.#tickReadCache.get(method);
+    if (cached) return cached as Promise<T>;
+    const promise = (this as unknown as { call: (m: string) => Promise<unknown> }).call(method);
+    this.#tickReadCache.set(method, promise);
+    return promise as Promise<T>;
   }
 
   #stopTick(): void {
@@ -485,4 +507,26 @@ type WrappedPlayer = {
   [K in WrappableName]: K extends keyof YT.Player ? Promisify<YT.Player[K]> : never;
 };
 
-export interface YTEmbed extends WrappedPlayer {}
+// Optional methods installed on the player by side-effect extensions. They are
+// declared optional because the extension that owns each method may not be
+// loaded in a given consumer's bundle. Extensions add these only after attach
+// and `delete` them on detach.
+//
+// Declared on the canonical interface (rather than via per-extension module
+// augmentation) because tsdown bundles all .d.ts into a single file, which
+// makes relative-path module augmentation unreliable — the same pattern used
+// for `YTEmbedEventMap` entries in `src/types.ts`.
+interface ExtensionAugmentedMethods {
+  // fullscreenExtension
+  enterFullscreen?: () => Promise<void>;
+  exitFullscreen?: () => Promise<void>;
+  toggleFullscreen?: () => Promise<void>;
+  // pictureInPictureExtension
+  enterPictureInPicture?: () => Promise<void>;
+  exitPictureInPicture?: () => Promise<void>;
+  togglePictureInPicture?: () => Promise<void>;
+  // captionsLanguageExtension
+  setCaptionsLanguage?: (languageCode: string | null) => Promise<void>;
+}
+
+export interface YTEmbed extends WrappedPlayer, ExtensionAugmentedMethods {}

@@ -14,14 +14,12 @@ export interface CuePointExtensionOptions<T = unknown> {
   readonly intervalMs?: number;
 }
 
-interface TimeReader {
-  getCurrentTime: () => Promise<number>;
-}
-
 /**
  * Engine for chapters, ad-breaks, and mention markers. Cues fire forward-only —
  * seeking past a cue triggers it; seeking backward does not re-fire. Built atop
- * `getCurrentTime()` polling. Lazy-attached on first `cuepoint` listener.
+ * `getCurrentTime()` polling via `player.tickRead` so the read coalesces with
+ * timeUpdate, abLoop, etc. on the same tick. Lazy-attached on first `cuepoint`
+ * listener.
  */
 export function cuePointExtension<T = unknown>(options: CuePointExtensionOptions<T>): Extension {
   const intervalMs = options.intervalMs ?? 250;
@@ -31,16 +29,13 @@ export function cuePointExtension<T = unknown>(options: CuePointExtensionOptions
   return {
     events: ['cuepoint'],
     attach(player: YTEmbed): () => void {
-      const reader = player as unknown as TimeReader;
       let lastTime = Number.NaN;
       let detached = false;
-      let inFlight = false;
 
       const tick = async () => {
-        if (inFlight || detached) return;
-        inFlight = true;
+        if (detached) return;
         try {
-          const t = await reader.getCurrentTime();
+          const t = await player.tickRead<number>('getCurrentTime');
           if (detached) return;
           if (Number.isNaN(lastTime)) {
             lastTime = t;
@@ -60,8 +55,8 @@ export function cuePointExtension<T = unknown>(options: CuePointExtensionOptions
             }
           }
           lastTime = t;
-        } finally {
-          inFlight = false;
+        } catch {
+          // Wrapper rejection — drop quietly.
         }
       };
 

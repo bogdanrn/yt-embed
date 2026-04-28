@@ -39,9 +39,7 @@ export function captionsLanguageExtension(
       };
 
       // Expose the helper on the player so consumers can call it imperatively.
-      (
-        player as unknown as { setCaptionsLanguage?: (code: string | null) => Promise<void> }
-      ).setCaptionsLanguage = setLanguage;
+      player.setCaptionsLanguage = setLanguage;
 
       if (options.defaultLanguage !== undefined) {
         void setLanguage(options.defaultLanguage);
@@ -49,9 +47,7 @@ export function captionsLanguageExtension(
 
       return () => {
         detached = true;
-        delete (
-          player as unknown as { setCaptionsLanguage?: (code: string | null) => Promise<void> }
-        ).setCaptionsLanguage;
+        delete player.setCaptionsLanguage;
       };
     },
   };

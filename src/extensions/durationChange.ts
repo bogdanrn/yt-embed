@@ -1,13 +1,10 @@
 import type { YTEmbed } from '../YTEmbed.js';
+import { pollAndDispatch } from './_pollAndDispatch.js';
 import type { Extension } from './types.js';
 
 export interface DurationChangeExtensionOptions {
   /** Polling interval in ms. Default: 1000. */
   intervalMs?: number;
-}
-
-interface DurationReader {
-  getDuration: () => Promise<number>;
 }
 
 /**
@@ -19,30 +16,13 @@ export function durationChangeExtension(options: DurationChangeExtensionOptions 
   return {
     events: ['durationchange'],
     attach(player: YTEmbed): () => void {
-      const reader = player as unknown as DurationReader;
-      let last = Number.NaN;
-      let detached = false;
-      let inFlight = false;
-
-      const tick = async () => {
-        if (inFlight || detached) return;
-        inFlight = true;
-        try {
-          const d = await reader.getDuration();
-          if (detached) return;
-          if (d === last || (Number.isNaN(d) && Number.isNaN(last))) return;
-          last = d;
-          player.dispatchEvent(new CustomEvent('durationchange', { detail: { duration: d } }));
-        } finally {
-          inFlight = false;
-        }
-      };
-
-      const unsubscribe = player.tick(() => void tick(), intervalMs);
-      return () => {
-        detached = true;
-        unsubscribe();
-      };
+      return pollAndDispatch({
+        player,
+        eventName: 'durationchange',
+        intervalMs,
+        read: () => player.tickRead<number>('getDuration'),
+        toDetail: (duration) => ({ duration }),
+      });
     },
   };
 }

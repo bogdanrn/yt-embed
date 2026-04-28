@@ -187,11 +187,8 @@ describe('extension behaviors', () => {
     });
     const captionsFired = vi.fn();
     player.addEventListener('captionschange', (e) => captionsFired(e.detail));
-    const augmented = player as unknown as {
-      setCaptionsLanguage: (code: string) => Promise<void>;
-    };
-    expect(typeof augmented.setCaptionsLanguage).toBe('function');
-    await augmented.setCaptionsLanguage('es');
+    expect(typeof player.setCaptionsLanguage).toBe('function');
+    await player.setCaptionsLanguage?.('es');
     await Promise.resolve();
     expect(captionsFired).toHaveBeenCalledWith({ languageCode: 'es' });
   });

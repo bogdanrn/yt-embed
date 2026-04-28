@@ -17,8 +17,7 @@ export interface PersistedStateExtensionOptions {
   restore?: boolean;
 }
 
-interface TimeRW {
-  getCurrentTime: () => Promise<number>;
+interface SeekCapable {
   seekTo: (time: number, allowSeekAhead: boolean) => Promise<void>;
 }
 
@@ -45,7 +44,7 @@ export function persistedStateExtension(options: PersistedStateExtensionOptions)
       const storage = resolveStorage(options.sink);
       if (!storage) return () => {};
 
-      const cap = player as unknown as TimeRW;
+      const cap = player as unknown as SeekCapable;
       let detached = false;
       // Cache the most recent currentTime so the destroy-time save can write
       // synchronously — by the time `detach` runs, the player is already
@@ -55,7 +54,7 @@ export function persistedStateExtension(options: PersistedStateExtensionOptions)
       const tickSave = async () => {
         if (detached) return;
         try {
-          const t = await cap.getCurrentTime();
+          const t = await player.tickRead<number>('getCurrentTime');
           if (detached) return;
           lastKnownTime = t;
           storage.setItem(options.key, String(t));

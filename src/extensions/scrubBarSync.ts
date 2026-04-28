@@ -7,36 +7,28 @@ export interface ScrubBarSyncExtensionOptions {
   intervalMs?: number;
 }
 
-interface ScrubReader {
-  getCurrentTime: () => Promise<number>;
-  getDuration: () => Promise<number>;
-  getVideoLoadedFraction: () => Promise<number>;
-}
-
 /**
  * Combines `getCurrentTime` + `getDuration` + `getVideoLoadedFraction` into a
- * single throttled `scrubsync` event. Drops the "three independent polls per
- * tick" pattern that scrub-bar code usually accumulates. State is read from the
- * player's cached `state` getter (no extra IPC). Lazy-attached.
+ * single throttled `scrubsync` event. Reads via `player.tickRead`, so when
+ * timeUpdate / durationChange / bufferProgress are also active they share the
+ * same in-flight calls — three IPCs per tick total, not nine. State is read
+ * from the cached `player.state` getter (no extra IPC). Lazy-attached.
  */
 export function scrubBarSyncExtension(options: ScrubBarSyncExtensionOptions = {}): Extension {
   const intervalMs = options.intervalMs ?? 250;
   return {
     events: ['scrubsync'],
     attach(player: YTEmbed): () => void {
-      const reader = player as unknown as ScrubReader;
       let detached = false;
-      let inFlight = false;
       let lastKey = '';
 
       const tick = async () => {
-        if (inFlight || detached) return;
-        inFlight = true;
+        if (detached) return;
         try {
           const [currentTime, duration, buffered] = await Promise.all([
-            reader.getCurrentTime(),
-            reader.getDuration(),
-            reader.getVideoLoadedFraction(),
+            player.tickRead<number>('getCurrentTime'),
+            player.tickRead<number>('getDuration'),
+            player.tickRead<number>('getVideoLoadedFraction'),
           ]);
           if (detached) return;
           const state: PlayerStateCode = player.state;
@@ -49,8 +41,8 @@ export function scrubBarSyncExtension(options: ScrubBarSyncExtensionOptions = {}
               detail: { currentTime, duration, buffered, state },
             }),
           );
-        } finally {
-          inFlight = false;
+        } catch {
+          // Wrapper rejection — drop quietly.
         }
       };
 

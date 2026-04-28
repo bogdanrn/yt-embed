@@ -10,15 +10,14 @@ export interface AbLoopExtensionOptions {
   readonly intervalMs?: number;
 }
 
-interface LoopCapable {
-  getCurrentTime: () => Promise<number>;
+interface SeekCapable {
   seekTo: (time: number, allowSeekAhead: boolean) => Promise<void>;
 }
 
 /**
- * A→B loop. Polls `getCurrentTime()`; when the playhead crosses `end`, seeks to
- * `start`. Lazy-attached on first `loop` listener; consumers can also detach by
- * removing the extension. Emits `loop` after each seek.
+ * A→B loop. Reads `getCurrentTime()` via the shared tick cache; when the
+ * playhead crosses `end`, seeks to `start` and emits `loop`. Lazy-attached on
+ * first `loop` listener.
  */
 export function abLoopExtension(options: AbLoopExtensionOptions): Extension {
   const intervalMs = options.intervalMs ?? 250;
@@ -26,23 +25,21 @@ export function abLoopExtension(options: AbLoopExtensionOptions): Extension {
   return {
     events: ['loop'],
     attach(player: YTEmbed): () => void {
-      const cap = player as unknown as LoopCapable;
+      const cap = player as unknown as SeekCapable;
       let detached = false;
-      let inFlight = false;
 
       const tick = async () => {
-        if (inFlight || detached) return;
-        inFlight = true;
+        if (detached) return;
         try {
-          const t = await cap.getCurrentTime();
+          const t = await player.tickRead<number>('getCurrentTime');
           if (detached) return;
           if (t >= end) {
             await cap.seekTo(start, true);
             if (detached) return;
             player.dispatchEvent(new CustomEvent('loop', { detail: { start, end } }));
           }
-        } finally {
-          inFlight = false;
+        } catch {
+          // Wrapper rejection — drop quietly.
         }
       };
 

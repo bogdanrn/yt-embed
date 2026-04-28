@@ -61,21 +61,16 @@ export function pictureInPictureExtension(): Extension {
         else await enter();
       };
 
-      const augment = player as unknown as {
-        enterPictureInPicture?: () => Promise<void>;
-        exitPictureInPicture?: () => Promise<void>;
-        togglePictureInPicture?: () => Promise<void>;
-      };
-      augment.enterPictureInPicture = enter;
-      augment.exitPictureInPicture = exit;
-      augment.togglePictureInPicture = toggle;
+      player.enterPictureInPicture = enter;
+      player.exitPictureInPicture = exit;
+      player.togglePictureInPicture = toggle;
 
       return () => {
         document.removeEventListener('enterpictureinpicture', onEnter);
         document.removeEventListener('leavepictureinpicture', onLeave);
-        delete augment.enterPictureInPicture;
-        delete augment.exitPictureInPicture;
-        delete augment.togglePictureInPicture;
+        delete player.enterPictureInPicture;
+        delete player.exitPictureInPicture;
+        delete player.togglePictureInPicture;
       };
     },
   };

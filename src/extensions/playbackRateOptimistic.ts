@@ -1,9 +1,8 @@
 import type { YTEmbed } from '../YTEmbed.js';
+import { wrapInstanceMethod } from './_wrapInstanceMethod.js';
 import type { Extension } from './types.js';
 
-interface RateCapable {
-  setPlaybackRate: (rate: number, ...rest: unknown[]) => Promise<unknown>;
-}
+type SetRateFn = (rate: number, ...rest: unknown[]) => Promise<unknown>;
 
 /**
  * Emits `playbackratechange` immediately on `setPlaybackRate` calls instead of
@@ -16,18 +15,7 @@ export function playbackRateOptimisticExtension(): Extension {
     events: [],
     eager: true,
     attach(player: YTEmbed): () => void {
-      const cap = player as unknown as RateCapable;
       let pendingOptimistic: number | null = null;
-
-      const origSetPlaybackRate = cap.setPlaybackRate.bind(player);
-
-      const wrappedSet = async (rate: number, ...rest: unknown[]): Promise<unknown> => {
-        pendingOptimistic = rate;
-        player.dispatchEvent(
-          new CustomEvent('playbackratechange', { detail: { rate, optimistic: true } }),
-        );
-        return origSetPlaybackRate(rate, ...rest);
-      };
 
       const onNative = (e: Event) => {
         const ce = e as CustomEvent<{ rate: number; optimistic?: boolean }>;
@@ -40,11 +28,19 @@ export function playbackRateOptimisticExtension(): Extension {
       };
       player.addEventListener('playbackratechange', onNative, true);
 
-      (cap as unknown as { setPlaybackRate: typeof wrappedSet }).setPlaybackRate = wrappedSet;
+      const restore = wrapInstanceMethod<SetRateFn>(player, 'setPlaybackRate', (previous) => {
+        return async (rate, ...rest) => {
+          pendingOptimistic = rate;
+          player.dispatchEvent(
+            new CustomEvent('playbackratechange', { detail: { rate, optimistic: true } }),
+          );
+          return previous(rate, ...rest);
+        };
+      });
 
       return () => {
         player.removeEventListener('playbackratechange', onNative, true);
-        delete (cap as Partial<RateCapable>).setPlaybackRate;
+        restore();
       };
     },
   };
