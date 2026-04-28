@@ -1,4 +1,3 @@
-import type * as YT from 'youtube';
 import { PlayerDestroyedError, PlayerInitError } from './errors.js';
 import { eventCallbackNames } from './eventCallbackNames.generated.js';
 import { type FunctionName, functionNames } from './functionNames.generated.js';

@@ -1,3 +1,5 @@
+// `typeof YT` is used in value position below — module import required;
+// the ambient global (sufficient elsewhere in the package) would trigger TS2686.
 import type * as YT from 'youtube';
 import { IframeApiLoadError } from './errors.js';
 

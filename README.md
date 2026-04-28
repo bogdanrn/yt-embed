@@ -2,12 +2,28 @@
 
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/bogdanrn/yt-embed?utm_source=oss&utm_medium=github&utm_campaign=bogdanrn%2Fyt-embed&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 
-Promise-wrapped YouTube IFrame Player API. TypeScript-first, dependency-free, `EventTarget`-based.
+Promise-wrapped YouTube IFrame Player API. TypeScript-first, zero runtime dependencies, `EventTarget`-based.
 
 ## Install
 
 ```bash
+# pnpm
 pnpm add @bogdanrn/yt-embed
+
+# npm
+npm install @bogdanrn/yt-embed
+
+# yarn
+yarn add @bogdanrn/yt-embed
+
+# bun
+bun add @bogdanrn/yt-embed
+```
+
+TypeScript users should also install `@types/youtube` (optional peer dep) so the global `YT` namespace referenced by the bundled `.d.ts` resolves:
+
+```bash
+pnpm add -D @types/youtube
 ```
 
 ## Quick start

@@ -30,7 +30,7 @@
     "access": "public",
     "provenance": true
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
   "scripts": {
     "generate": "tsx scripts/generate.ts",
     "postgenerate": "tsx scripts/inject-readme.ts",
@@ -53,6 +53,14 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,md}": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+  },
+  "peerDependencies": {
+    "@types/youtube": "^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/youtube": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.13",
